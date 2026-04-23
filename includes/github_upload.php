@@ -1,14 +1,25 @@
-<?php
 /**
- * GitHub File Uploader Helper
- * Uploads a file to a GitHub repo via the GitHub Contents API
- * and returns the raw CDN URL for storage in the database.
+ * Fetch GitHub Configuration from Settings Table
  */
-
-define('GITHUB_OWNER', 'mdnahidul337');
-define('GITHUB_REPO',  'file-upload');
-define('GITHUB_TOKEN', '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');
-define('GITHUB_BRANCH','main');
+function get_github_settings() {
+    global $pdo;
+    if (!isset($pdo)) {
+        require_once dirname(__FILE__) . '/db_connect.php';
+    }
+    
+    $stmt = $pdo->query("SELECT setting_key, setting_value FROM settings WHERE setting_key LIKE 'github_%'");
+    $settings = [];
+    while ($row = $stmt->fetch()) {
+        $settings[$row['setting_key']] = $row['setting_value'];
+    }
+    
+    return [
+        'owner'  => $settings['github_owner']  ?? 'mdnahidul337',
+        'repo'   => $settings['github_repo']   ?? 'file-upload',
+        'token'  => $settings['github_token']  ?? '',
+        'branch' => $settings['github_branch'] ?? 'main'
+    ];
+}
 
 /**
  * Upload a local temp file to GitHub and return its raw URL.
@@ -20,9 +31,12 @@ define('GITHUB_BRANCH','main');
  */
 function github_upload(string $tmp_path, string $filename, string $folder = 'events'): string|false
 {
+    $gh = get_github_settings();
+    if (empty($gh['token'])) return false;
+
     $content  = base64_encode(file_get_contents($tmp_path));
     $api_path = $folder . '/' . $filename;
-    $url      = "https://api.github.com/repos/" . GITHUB_OWNER . "/" . GITHUB_REPO . "/contents/" . $api_path;
+    $url      = "https://api.github.com/repos/" . $gh['owner'] . "/" . $gh['repo'] . "/contents/" . $api_path;
 
     // Check if file already exists (to get its SHA for update)
     $sha = null;
@@ -30,7 +44,7 @@ function github_upload(string $tmp_path, string $filename, string $folder = 'eve
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_HTTPHEADER     => [
-            'Authorization: token ' . GITHUB_TOKEN,
+            'Authorization: token ' . $gh['token'],
             'Accept: application/vnd.github.v3+json',
             'User-Agent: SCC-Club-App',
         ],
@@ -43,7 +57,7 @@ function github_upload(string $tmp_path, string $filename, string $folder = 'eve
     $body = [
         'message' => 'Upload ' . $api_path . ' via SCC Portal',
         'content' => $content,
-        'branch'  => GITHUB_BRANCH,
+        'branch'  => $gh['branch'],
     ];
     if ($sha) $body['sha'] = $sha;
 
@@ -53,7 +67,7 @@ function github_upload(string $tmp_path, string $filename, string $folder = 'eve
         CURLOPT_CUSTOMREQUEST  => 'PUT',
         CURLOPT_POSTFIELDS     => json_encode($body),
         CURLOPT_HTTPHEADER     => [
-            'Authorization: token ' . GITHUB_TOKEN,
+            'Authorization: token ' . $gh['token'],
             'Accept: application/vnd.github.v3+json',
             'Content-Type: application/json',
             'User-Agent: SCC-Club-App',
@@ -65,9 +79,7 @@ function github_upload(string $tmp_path, string $filename, string $folder = 'eve
 
     if (in_array($http_code, [200, 201]) && isset($response['content']['download_url'])) {
         // Convert to jsDelivr CDN URL for faster loading
-        $raw_url = $response['content']['download_url'];
-        // Also build jsDelivr alternative: https://cdn.jsdelivr.net/gh/owner/repo@branch/path
-        $cdn_url = "https://cdn.jsdelivr.net/gh/" . GITHUB_OWNER . "/" . GITHUB_REPO . "@" . GITHUB_BRANCH . "/" . $api_path;
+        $cdn_url = "https://cdn.jsdelivr.net/gh/" . $gh['owner'] . "/" . $gh['repo'] . "@" . $gh['branch'] . "/" . $api_path;
         return $cdn_url;
     }
 
@@ -82,6 +94,9 @@ function github_upload(string $tmp_path, string $filename, string $folder = 'eve
  */
 function github_delete(string $cdn_url): bool
 {
+    $gh = get_github_settings();
+    if (empty($gh['token'])) return false;
+
     // Extract path from URL
     // cdn.jsdelivr.net/gh/owner/repo@branch/folder/file  → folder/file
     if (preg_match('#@[^/]+/(.+)$#', $cdn_url, $m)) {
@@ -90,14 +105,14 @@ function github_delete(string $cdn_url): bool
         return false;
     }
 
-    $url = "https://api.github.com/repos/" . GITHUB_OWNER . "/" . GITHUB_REPO . "/contents/" . $api_path;
+    $url = "https://api.github.com/repos/" . $gh['owner'] . "/" . $gh['repo'] . "/contents/" . $api_path;
 
     // Get SHA
     $ch = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_HTTPHEADER     => [
-            'Authorization: token ' . GITHUB_TOKEN,
+            'Authorization: token ' . $gh['token'],
             'Accept: application/vnd.github.v3+json',
             'User-Agent: SCC-Club-App',
         ],
@@ -109,7 +124,7 @@ function github_delete(string $cdn_url): bool
     $body = [
         'message' => 'Delete ' . $api_path . ' via SCC Portal',
         'sha'     => $data['sha'],
-        'branch'  => GITHUB_BRANCH,
+        'branch'  => $gh['branch'],
     ];
 
     $ch = curl_init($url);
@@ -118,7 +133,7 @@ function github_delete(string $cdn_url): bool
         CURLOPT_CUSTOMREQUEST  => 'DELETE',
         CURLOPT_POSTFIELDS     => json_encode($body),
         CURLOPT_HTTPHEADER     => [
-            'Authorization: token ' . GITHUB_TOKEN,
+            'Authorization: token ' . $gh['token'],
             'Accept: application/vnd.github.v3+json',
             'Content-Type: application/json',
             'User-Agent: SCC-Club-App',

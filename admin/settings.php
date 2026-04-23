@@ -26,11 +26,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $registration_fee_cutoff = trim($_POST['registration_fee_cutoff']);
         $payment_instructions = trim($_POST['payment_instructions']);
         
+        $github_token = trim($_POST['github_token']);
+        $github_owner = trim($_POST['github_owner']);
+        $github_repo = trim($_POST['github_repo']);
+        $github_branch = trim($_POST['github_branch']);
+        
         $pdo->prepare("INSERT IGNORE INTO settings (setting_key, setting_value) VALUES ('facebook_url', '')")->execute();
         $pdo->prepare("INSERT IGNORE INTO settings (setting_key, setting_value) VALUES ('twitter_url', '')")->execute();
         $pdo->prepare("INSERT IGNORE INTO settings (setting_key, setting_value) VALUES ('logo_path', '')")->execute();
         $pdo->prepare("INSERT IGNORE INTO settings (setting_key, setting_value) VALUES ('payment_instructions', '')")->execute();
         $pdo->prepare("INSERT IGNORE INTO settings (setting_key, setting_value) VALUES ('registration_fee_cutoff', '')")->execute();
+        $pdo->prepare("INSERT IGNORE INTO settings (setting_key, setting_value) VALUES ('github_token', '')")->execute();
+        $pdo->prepare("INSERT IGNORE INTO settings (setting_key, setting_value) VALUES ('github_owner', '')")->execute();
+        $pdo->prepare("INSERT IGNORE INTO settings (setting_key, setting_value) VALUES ('github_repo', '')")->execute();
+        $pdo->prepare("INSERT IGNORE INTO settings (setting_key, setting_value) VALUES ('github_branch', '')")->execute();
 
         $facebook_url = trim($_POST['facebook_url'] ?? '');
         $twitter_url = trim($_POST['twitter_url'] ?? '');
@@ -42,6 +51,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdo->prepare("UPDATE settings SET setting_value = ? WHERE setting_key = 'twitter_url'")->execute([$twitter_url]);
         $pdo->prepare("UPDATE settings SET setting_value = ? WHERE setting_key = 'payment_instructions'")->execute([$payment_instructions]);
         $pdo->prepare("UPDATE settings SET setting_value = ? WHERE setting_key = 'registration_fee_cutoff'")->execute([$registration_fee_cutoff]);
+        $pdo->prepare("UPDATE settings SET setting_value = ? WHERE setting_key = 'github_token'")->execute([$github_token]);
+        $pdo->prepare("UPDATE settings SET setting_value = ? WHERE setting_key = 'github_owner'")->execute([$github_owner]);
+        $pdo->prepare("UPDATE settings SET setting_value = ? WHERE setting_key = 'github_repo'")->execute([$github_repo]);
+        $pdo->prepare("UPDATE settings SET setting_value = ? WHERE setting_key = 'github_branch'")->execute([$github_branch]);
 
         // Handle Logo Upload
         if (isset($_FILES['logo']) && $_FILES['logo']['error'] === UPLOAD_ERR_OK) {
@@ -142,6 +155,26 @@ foreach ($settings_raw as $s) {
                         <input type="file" name="logo" class="form-control" accept="image/*">
                         <small style="color:var(--text-muted);">Leave empty to keep current logo.</small>
                     </div>
+                    <hr style="margin: 2rem 0; border: 0; border-top: 1px solid var(--border-color);">
+                    <h3 style="margin-bottom: 1.5rem;"><i class="fa-brands fa-github"></i> GitHub Storage Settings</h3>
+                    <div class="form-group">
+                        <label>GitHub Token</label>
+                        <input type="password" name="github_token" class="form-control" value="<?php echo htmlspecialchars($settings['github_token'] ?? ''); ?>" placeholder="github_pat_...">
+                        <small style="color:var(--text-muted);">Personal Access Token with 'repo' scope.</small>
+                    </div>
+                    <div class="form-group">
+                        <label>GitHub Owner</label>
+                        <input type="text" name="github_owner" class="form-control" value="<?php echo htmlspecialchars($settings['github_owner'] ?? ''); ?>" placeholder="username">
+                    </div>
+                    <div class="form-group">
+                        <label>GitHub Repository</label>
+                        <input type="text" name="github_repo" class="form-control" value="<?php echo htmlspecialchars($settings['github_repo'] ?? ''); ?>" placeholder="repo-name">
+                    </div>
+                    <div class="form-group">
+                        <label>GitHub Branch</label>
+                        <input type="text" name="github_branch" class="form-control" value="<?php echo htmlspecialchars($settings['github_branch'] ?? 'main'); ?>">
+                    </div>
+
                     <button type="submit" name="update_settings" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Save Settings</button>
                 </form>
             </div>
