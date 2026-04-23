@@ -1,0 +1,43 @@
+Design a modern, clean, and minimal dashboard interface for a Computer Club management system.
+
+Style:
+
+* Clean UI with soft shadows and smooth rounded corners
+* Minimalist layout with strong visual hierarchy
+* Consistent spacing and grid alignment
+* Modern typography (sans-serif, clean and readable)
+* Subtle gradients and glassmorphism elements (light usage)
+
+Color Theme:
+
+* Primary: Deep blue or indigo
+* Secondary: Soft purple or cyan accent
+* Background: Light gray or dark mode (both variants)
+* Use soft contrast, not harsh colors
+
+Layout:
+
+* Left sidebar navigation (icons + labels)
+* Top header with profile, notifications, search bar
+* Main content area with cards and sections
+
+Components:
+
+* User cards with role badges (Admin, Technical, Member, etc.)
+* Clean data tables with hover effects
+* Buttons with smooth hover animations
+* Modal popups for actions (add user, assign role)
+* Status indicators (active, inactive)
+
+Visual Feel:
+
+* Professional, tech-focused, startup-style dashboard
+* Inspired by modern SaaS products
+* Simple, elegant, clutter-free interface
+
+UX:
+
+* Easy navigation
+* Clear role visibility with colored badges
+* Responsive design (desktop + mobile friendly)
+php based 

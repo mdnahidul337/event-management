@@ -1,0 +1,57 @@
+FEATURES:
+- User Login System
+- User Registration System
+- Role-Based Access Control (RBAC)
+- Dashboard (based on user role)
+- User Management (create, edit, delete users)
+- Secure Authentication (password hashing, sessions)
+- Profile Management
+- Activity Logs / Audit System
+- Permission Management
+- Notifications System
+- Responsive UI (mobile + desktop)
+
+ROLES:
+
+SuperAdmin:
+- Full system control
+- Manage all users, roles, and permissions
+- System configuration & settings
+- Access to all modules
+
+Admin:
+- Manage users & operations
+- Assign roles
+- Monitor system activities
+- Limited system settings access
+
+Accounting:
+- Manage financial records
+- Handle transactions & payments
+- Generate financial reports
+
+Management:
+- Planning & decision making
+- View reports & analytics
+- Monitor performance
+
+Technical:
+- Developers / IT team
+- System maintenance
+- Debugging & updates
+- Server & database handling
+
+EventManager:
+- Manage events & logistics
+- Create and organize events
+- Track event participation
+
+SocialMediaManager:
+- Handle media & promotion
+- Manage posts & campaigns
+- Analyze engagement
+
+Member:
+- General users
+- Access basic features
+- View content & participate

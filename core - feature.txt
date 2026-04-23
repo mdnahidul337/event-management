@@ -1,0 +1,922 @@
+SYSTEM_NAME: Event Management & Social Platform
+
+ROLE HIERARCHY (STRICT ACCESS CONTROL):
+- SuperAdmin (Level 100)
+- Admin (Level 90)
+- Accounting (Level 80)
+- Management (Level 70)
+- Technical (Level 60)
+- EventManager (Level 50)
+- SocialMediaManager (Level 40)
+- Member (Level 10)
+
+RULES:
+- Higher roles can access lower role tools
+- Lower roles CANNOT access higher role tools
+- Same-level roles cannot modify each other (optional restriction)
+- All permission checks enforced via middleware/backend
+
+--------------------------------------------------
+
+PUBLIC FEATURES (No Login Required):
+- View all events list
+- View event details page
+- Event start date & time display
+- Limited Like / Comment / Share preview
+- Join button (redirect to login if needed)
+- Pages: Home, Events, Team, About, Contact
+
+--------------------------------------------------
+
+AUTH SYSTEM:
+- Registration / Login / Logout
+- Password Reset
+- Role-Based Access Control (RBAC)
+- Session & Token Security
+
+--------------------------------------------------
+
+MENU BAR:
+- HOME | EVENTS | TEAM | ABOUT | CONTACT | LOGIN | REGISTER
+
+--------------------------------------------------
+
+EVENT SYSTEM:
+- Create / Edit / Delete Event (Admin, EventManager)
+- Event Banner/Image
+- Description, Location
+- Start Date & Time
+- Event Type: Free / Paid
+- Status: Upcoming / Ongoing / Completed
+
+--------------------------------------------------
+
+SOCIAL SYSTEM:
+- Like Events
+- Comment System
+- Share (link-based)
+- Join Button
+- Joined Users List
+
+--------------------------------------------------
+
+JOIN & PAYMENT SYSTEM:
+
+FREE EVENT:
+- One-click join
+
+PAID EVENT:
+- Manual payment required
+
+PAYMENT METHODS: user can select any one and number update only accounting,admin,superadmin
+- Bkash
+- Nagad
+
+PAYMENT INPUT:
+- Sender Number
+- Transaction ID (TrxID)
+- Amount
+- Screenshot (optional)
+
+PAYMENT STATUS:
+- Pending → Approved / Rejected
+
+ACCESS:
+- Accounting → Verify payments
+- Admin → Override decisions
+
+--------------------------------------------------
+
+REGISTRATION SETTINGS:
+- Registration Fee ON/OFF (SuperAdmin only)
+
+IF ON:
+- Payment required during signup
+
+IF OFF:
+- Free registration
+
+--------------------------------------------------
+
+SOCIAL MEDIA MANAGEMENT SYSTEM:
+
+SocialMediaManager:
+- Create Posts
+- Edit Posts
+- Delete Posts
+- Add promotional content
+- Manage announcements
+
+POST FEATURES:
+- Title
+- Description
+- Image/Media
+- Publish Date
+- Visibility: Public / Members
+
+VISIBILITY:
+- All roles can VIEW posts
+- Only SocialMediaManager (and above roles) can manage posts
+
+--------------------------------------------------
+
+ADMIN PANEL FEATURES:
+
+SuperAdmin:
+- Full control
+- Manage all roles & permissions
+- Site settings (name, logo, favicon)
+- Payment configuration
+- Registration fee toggle
+- Social media links
+- Full logs access
+- Custom logo/icon (admin can update his specific logo)
+- Email setting for all mail sending - SMTP Settings
+- Custom Mail Send To User /All user /or only no-member (message box html code editor)
+
+Admin:
+- Manage users
+- Manage events
+- Site settings (name, logo, favicon)
+- Manage all roles & permissions
+- Approve/reject payments
+- Payment configuration
+- View reports
+- Full logs access
+- Limited settings
+- Custom logo/icon (admin can update his specific logo)
+- Registration fee toggle
+
+Accounting:
+- collect member fees
+- collect event fees
+- collect amount add/sub must be add note / reason month / year/daily reports show monthly show yearely show
+- total amount show / New Balance Show
+- Payment verification
+- Financial tracking
+- Reports
+
+Management:
+- Analytics dashboard
+- System monitoring
+
+Technical:
+- System maintenance
+- Database/server handling
+- Debugging/log monitoring
+
+EventManager:
+- Event CRUD
+- Participant management
+
+SocialMediaManager:
+- Content & promotion management
+- Make Posts with image/vedio add/edit/remove/show/hide/draft/publish, show in home page this tools Access admin, superadmin, Accounting, Management, Technical, EventManager
+
+Member:
+- Join events
+- Comment / interact(Like,Share, Comment)
+
+--------------------------------------------------
+
+SETTINGS PANEL (CONTROLLED ACCESS):
+
+SuperAdmin ONLY:
+- Site Name
+- Logo Upload
+- Favicon Upload
+- Social Media URLs
+- Contact Info
+- Registration Fee Toggle
+
+Admin (Limited):
+- View settings (read-only or partial edit)
+
+--------------------------------------------------
+
+ACTIVITY LOG SYSTEM (VERY IMPORTANT):
+
+AUTO LOG TRACKING:
+- Every settings change
+- Every user action (create/edit/delete)
+- Payment approval/rejection
+- Role updates
+
+LOG FIELDS:
+- User ID
+- Role
+- Action Type
+- Module (event/payment/settings/user)
+- Old Value
+- New Value
+- Timestamp
+- IP Address
+
+ACCESS:
+- SuperAdmin → Full logs
+- Admin → Partial logs
+- Others → No access
+
+--------------------------------------------------
+
+SECURITY RULES:
+
+- Role middleware enforcement (backend required)
+- API-level permission validation
+- CSRF protection
+- Input validation & sanitization
+- Password hashing (bcrypt)
+- Session timeout
+
+--------------------------------------------------
+
+DATABASE MODULES:
+
+- users
+- roles
+- role_permissions
+- events
+- event_participants
+- posts (NEW)
+- comments
+- payments
+- settings
+- activity_logs (NEW)
+- notifications
+
+--------------------------------------------------
+
+PERMISSION MODEL (IMPORTANT):
+
+EXAMPLE:
+- Member cannot access:
+  - Admin panel
+  - Payments
+  - Settings
+
+- SocialMediaManager cannot access:
+  - Financial data
+  - Role management
+
+- Accounting cannot:
+  - Change system settings
+
+- ONLY SuperAdmin and Admin:
+  - Full system override
+
+--------------------------------------------------
+
+EXTRA FEATURES:
+- Responsive UI
+- Event search & filter
+- Notifications
+- SEO URLs
+- Dashboard per role
+
+--------------------------------------------------
+TEAM PAGE MODULE:
+
+PURPOSE:
+- Display all organization members publicly
+- Show structured member profiles with roles & contact info
+
+--------------------------------------------------
+
+PUBLIC VIEW (No Login Required):
+- View all team members
+- Search / filter members by:
+  - Role
+  - Session (e.g., 2024-25)
+- Grid/List layout display
+
+--------------------------------------------------
+
+MEMBER PROFILE CARD FIELDS:
+- Name
+- Sub-title (e.g., "Computer Club")
+- Position (Role)
+- Session (e.g., 2023-2024)
+- Profile Image
+- Contact Info:
+  - Email (optional)
+  - Phone (optional)
+  - Social Links (optional: Facebook, LinkedIn)
+
+OPTIONAL:
+- Short Bio / Description
+
+--------------------------------------------------
+
+TEAM STRUCTURE DISPLAY:
+- Group members by role:
+  - SuperAdmin
+  - Admin
+  - Management
+  - Technical
+  - EventManager
+  - SocialMediaManager
+  - Member
+
+OR:
+- Custom grouping (e.g., "Core Team", "Executive Panel")
+
+--------------------------------------------------
+
+PERMISSIONS (IMPORTANT):
+
+CAN ADD / EDIT / DELETE TEAM MEMBERS:
+- SuperAdmin
+- Admin
+- Management
+- Technical
+- EventManager
+
+CANNOT MODIFY TEAM DATA:
+- Accounting
+- SocialMediaManager (view only)
+- Member (view only)
+
+--------------------------------------------------
+
+ADMIN FEATURES (TEAM MANAGEMENT):
+
+- Add Member Profile
+- Edit Member Info
+- Delete Member
+- Upload Profile Image
+- Assign Role
+- Assign Session
+- Set Display Order (priority)
+
+--------------------------------------------------
+
+ADVANCED FEATURES:
+
+- Featured Members (highlight top members)
+- Sort by:
+  - Role priority
+  - Custom order
+- Active / Inactive toggle:
+  - Hide past members without deleting
+
+--------------------------------------------------
+
+DATABASE MODULE (TEAM):
+
+TABLE: team_members
+- id
+- name
+- subtitle
+- position (role reference or custom)
+- session
+- image
+- email
+- phone
+- social_links (JSON)
+- bio
+- role_id (optional relation)
+- display_order
+- status (active/inactive)
+- created_by
+- updated_by
+- created_at
+- updated_at
+
+--------------------------------------------------
+
+ACTIVITY LOG INTEGRATION:
+
+Track:
+- Add member
+- Edit member info
+- Delete member
+- Change role/session
+
+--------------------------------------------------
+
+UI FEATURES:
+
+- Responsive card layout
+- Hover effect (show contact info)
+- Profile modal or dedicated profile page
+- Lazy loading for large teams
+
+--------------------------------------------------
+
+SEO / PERFORMANCE:
+
+- Clean URLs (optional):
+  /team
+  /team/member/{id}
+
+- Optimized images (compressed thumbnails)
+
+--------------------------------------------------
+
+SECURITY:
+
+- Only authorized roles can modify data
+- Input validation for all fields
+- Image upload restrictions (size/type)
+
+--------------------------------------------------
+
+INTEGRATION:
+
+- Linked with USERS table (optional)
+- Sync role from system roles (if needed)
+
+--------------------------------------------------
+ADVANCED SYSTEM FEATURES:
+
+--------------------------------------------------
+
+USER PROFILE SYSTEM:
+- Public user profile page (/user/{username})
+- Profile fields:
+  - Name, Image, Bio
+  - Role
+  - Joined events
+- Edit profile (user controlled)
+- Profile privacy settings
+
+--------------------------------------------------
+
+FOLLOW / CONNECT SYSTEM:
+- Follow other members
+- Followers / Following list
+- Activity feed (optional)
+
+--------------------------------------------------
+
+NOTIFICATION SYSTEM (REAL-TIME / DATABASE):
+- Event updates
+- Join approval/rejection
+- Payment status update
+- Comments & replies
+- Admin announcements
+
+NOTIFICATION TYPES:
+- In-app notification
+- Email send on mail
+
+--------------------------------------------------
+
+EVENT INTERACTION FEATURES:
+- Save / Bookmark events
+- Interested button (like Facebook)
+- Countdown timer for events
+- Event reminder system
+
+--------------------------------------------------
+
+TICKETING SYSTEM (ADVANCED):
+- Generate ticket after joining
+- Unique Ticket ID / QR Code
+- Download ticket (PDF)
+- Check-in system (scan QR)
+
+--------------------------------------------------
+
+CHECK-IN SYSTEM (EVENT DAY):
+- Scan QR code (mobile/admin panel)
+- Mark attendance
+- Attendance report export
+
+--------------------------------------------------
+
+REPORTING & ANALYTICS:
+
+DASHBOARD STATS:
+- Total users
+- Total events
+- Total revenue
+- Active participants
+
+EVENT ANALYTICS:
+- Number of joins
+- Paid vs free ratio
+- Engagement (likes/comments)
+
+FINANCIAL REPORTS:
+- Total payments
+- Pending payments
+- Monthly revenue
+
+--------------------------------------------------
+
+ADVANCED PAYMENT FEATURES:
+
+- Multiple payment numbers (configurable)
+- Auto amount validation
+- Payment note/message
+- Payment history per user
+
+--------------------------------------------------
+
+CONTENT MANAGEMENT SYSTEM (CMS):
+
+- Manage static pages:
+  - About
+  - Contact
+  - Terms & Conditions
+  - Privacy Policy
+
+- Rich text editor (for content)
+
+--------------------------------------------------
+
+EMAIL SYSTEM (OPTIONAL FUTURE):
+- Registration confirmation
+- Event join confirmation
+- Payment approval email
+- Password reset email
+
+--------------------------------------------------
+
+SEARCH SYSTEM (ADVANCED):
+- Search by:
+  - Event name
+  - Location
+  - Date
+- Auto-suggestions
+- Filters:
+  - Free / Paid
+  - Upcoming / Completed
+
+--------------------------------------------------
+
+ROLE PERMISSION MANAGEMENT (DYNAMIC):
+
+- Assign custom permissions per role
+- Enable/disable modules per role
+- Fine-grained access control (CRUD level)
+
+--------------------------------------------------
+
+BLOCK / RESTRICTION SYSTEM:
+
+- Block users
+- Restrict access to features
+- Temporary suspension
+
+--------------------------------------------------
+
+COMMENT SYSTEM (ADVANCED):
+
+- Reply to comments
+- Like comments
+- Report comment
+- Admin moderation tools
+
+--------------------------------------------------
+
+MEDIA SYSTEM:
+
+- Upload images (events, posts, profiles)
+- File manager (admin panel)
+- Image optimization
+
+--------------------------------------------------
+
+API SYSTEM:
+
+- REST API support
+- Token-based authentication (JWT)
+- Mobile app ready
+
+--------------------------------------------------
+
+MULTI-LANGUAGE SUPPORT:
+
+- English / Bangla toggle
+- Dynamic language system
+
+--------------------------------------------------
+
+THEME SYSTEM:
+
+- Dark / Light mode
+- Custom color themes (admin controlled)
+
+--------------------------------------------------
+
+BACKUP & RESTORE:
+
+- Database backup (manual/auto)
+- Restore system
+
+--------------------------------------------------
+
+SYSTEM LOGS (EXTENDED):
+
+- Login history
+- Failed login attempts
+- Security logs
+
+--------------------------------------------------
+
+SECURITY ENHANCEMENTS:
+
+- Two-Factor Authentication (2FA)
+- Email/OTP verification
+- Rate limiting (anti-spam)
+- XSS / SQL Injection protection
+
+--------------------------------------------------
+
+PERFORMANCE OPTIMIZATION:
+
+- Caching system
+- Lazy loading
+- CDN support (future)
+
+--------------------------------------------------
+
+SEO & MARKETING:
+
+- Meta tags control
+- Open Graph (Facebook share preview)
+- Sitemap generation
+- Google Analytics integration
+
+--------------------------------------------------
+
+PWA SUPPORT (OPTIONAL):
+
+- Installable web app
+- Offline basic support
+
+--------------------------------------------------
+
+CHAT / MESSAGING SYSTEM (OPTIONAL ADVANCED):
+
+- Member-to-member chat
+- Admin announcements chat
+- Group chat for events
+
+--------------------------------------------------
+
+EXPORT / IMPORT:
+
+- Export users/events/payments (CSV)
+- Import data (admin tool)
+
+--------------------------------------------------
+
+FUTURE SCALABILITY:
+
+- Microservice-ready structure
+- Modular architecture
+- Queue system (jobs)
+
+--------------------------------------------------
+SMTP MAIL SYSTEM:
+
+PURPOSE:
+- Send system emails (registration, password reset, event updates, payment status)
+
+--------------------------------------------------
+
+SMTP SETTINGS (Dynamic - Admin Controlled):
+
+FIELDS:
+- MAIL_DRIVER (smtp)
+- MAIL_HOST (e.g., smtp.gmail.com)
+- MAIL_PORT (587 / 465)
+- MAIL_USERNAME (email)
+- MAIL_PASSWORD (app password)
+- MAIL_ENCRYPTION (tls / ssl)
+- MAIL_FROM_NAME (site name)
+- MAIL_FROM_ADDRESS (no-reply@domain.com)
+
+ACCESS:
+- SuperAdmin ONLY can edit
+- Admin → view only (optional)
+
+STORAGE:
+- Save in database (settings table)
+- Load dynamically into config at runtime
+
+--------------------------------------------------
+
+CUSTOM EMAIL TEMPLATE SYSTEM:
+
+TEMPLATE TYPES:
+- Registration Welcome
+- Email Verification
+- Password Reset
+- Event Join Confirmation
+- Payment Submitted
+- Payment Approved
+- Payment Rejected (reason can be optional, super admin ,admin, accounting)
+- Event Reminder
+- Admin Announcement
+
+--------------------------------------------------
+
+EMAIL TEMPLATE STRUCTURE:
+
+FIELDS:
+- template_name
+- subject
+- message_body (HTML supported)
+- variables (dynamic placeholders)
+- status (active/inactive)
+
+--------------------------------------------------
+
+SUPPORTED VARIABLES (DYNAMIC TAGS):
+
+- {user_name}
+- {user_email}
+- {event_name}
+- {event_date}
+- {payment_amount}
+- {payment_status}
+- {trx_id}
+- {site_name}
+- {login_url}
+
+Example:
+"Hello {user_name}, your payment for {event_name} is {payment_status}"
+
+--------------------------------------------------
+
+EMAIL TEMPLATE EDITOR (ADMIN PANEL):
+
+FEATURES:
+- Rich text editor (HTML)
+- Insert variables dropdown
+- Preview email before sending
+- Enable / Disable template
+
+ACCESS:
+- SuperAdmin → full access
+- Admin → optional access
+
+--------------------------------------------------
+
+EMAIL QUEUE SYSTEM (RECOMMENDED):
+
+- Queue emails (avoid delay)
+- Retry failed emails
+- Background worker (Laravel Queue)
+
+--------------------------------------------------
+
+EMAIL LOG SYSTEM:
+
+TABLE: email_logs
+- id
+- user_id
+- email
+- subject
+- message
+- status (sent/failed)
+- error_message
+- sent_at
+
+ACCESS:
+- SuperAdmin → full logs
+- Admin → partial view
+
+--------------------------------------------------
+
+TRIGGER SYSTEM (WHEN EMAIL SENDS):
+
+AUTO SEND ON:
+- User registration
+- Password reset request
+- Event join
+- Payment submit
+- Payment approval/rejection
+- Event reminder (scheduled)
+
+--------------------------------------------------
+
+TEST SMTP FEATURE:
+
+- Send test email button
+- Validate SMTP config instantly
+
+--------------------------------------------------
+
+SECURITY:
+
+- Encrypt SMTP password in database
+- Validate inputs
+- Prevent spam (rate limit emails)
+
+--------------------------------------------------
+
+LARAVEL IMPLEMENTATION NOTES:
+
+.env (fallback):
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=your@email.com
+MAIL_PASSWORD=your_app_password
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=no-reply@site.com
+MAIL_FROM_NAME="Your Site"
+
+Dynamic override:
+- Use config(['mail.mailers.smtp.host' => $value])
+
+--------------------------------------------------
+
+BADGE / ACHIEVEMENT SYSTEM:
+- Assign badges:
+  - Active Member
+  - Top Contributor
+  - Event Organizer
+- Display badges on profile
+
+--------------------------------------------------
+
+LIVE EVENT FEATURES:
+- Live streaming integration (YouTube/Facebook embed)
+- Live chat during events
+- Real-time participant counter
+
+--------------------------------------------------
+
+EVENT WAITLIST SYSTEM:
+- If event is full:
+  - Users join waitlist
+
+FILE UPLOAD SYSTEM:
+- Upload documents per event
+- Certificates, instructions, etc.
+
+CERTIFICATE GENERATION SYSTEM:
+- Auto-generate certificates (PDF)
+- Include:
+  - Name
+  - Event
+  - Date
+- Download after event completion
+
+--------------------------------------------------
+
+SPONSOR / PARTNER MODULE:
+- Add sponsors
+- Display logos on event page
+- Sponsor tiers (Gold, Silver, etc.)
+
+FEEDBACK / REVIEW SYSTEM:
+- Rate events (stars)
+- Leave feedback
+- Admin moderation
+
+--------------------------------------------------
+
+POLL / VOTING SYSTEM:
+- Create polls for members
+- Voting results (real-time)
+
+--------------------------------------------------
+
+CALENDAR INTEGRATION:
+- Calendar view of events
+- Export to:
+  - Google Calendar
+  - ICS file
+
+--------------------------------------------------
+
+REMINDER AUTOMATION:
+- Email/SMS before event
+- Configurable timing (e.g., 1 hour before)
+
+--------------------------------------------------
+
+SMS INTEGRATION (ADVANCED):
+- Send SMS notifications
+- OTP verification (optional)
+
+--------------------------------------------------
+
+GEO-LOCATION FEATURES:
+- Event location map (Google Maps)
+- Directions link
+
+--------------------------------------------------
+
+QR CODE SYSTEM:
+- Generate QR for events
+- Scan to join/check-in
+
+--------------------------------------------------
+
+DEVICE / SESSION MANAGEMENT:
+- View active sessions
+- Logout from other devices
+
+--------------------------------------------------
+
+ADMIN CHAT / SUPPORT SYSTEM:
+- User → Admin/SocialMediaManager support chat
+- Ticket system
