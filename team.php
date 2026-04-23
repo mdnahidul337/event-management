@@ -1,13 +1,22 @@
 <?php
 require_once 'includes/db_connect.php';
 
+try { $pdo->exec("ALTER TABLE users ADD COLUMN department VARCHAR(100) DEFAULT NULL"); } catch (PDOException $e) {}
+try { $pdo->exec("ALTER TABLE users ADD COLUMN session VARCHAR(50) DEFAULT NULL"); } catch (PDOException $e) {}
+try { $pdo->exec("ALTER TABLE users ADD COLUMN blood_group VARCHAR(10) DEFAULT NULL"); } catch (PDOException $e) {}
+try { $pdo->exec("ALTER TABLE users ADD COLUMN profile_pic VARCHAR(255) DEFAULT NULL"); } catch (PDOException $e) {}
+try { $pdo->exec("ALTER TABLE users ADD COLUMN phone VARCHAR(20) DEFAULT NULL"); } catch (PDOException $e) {}
+
 // Fetch users grouped by role to display as team members
 // Only fetch roles level 40 and above (SuperAdmin down to SocialMediaManager)
+session_start();
+$is_upper_role = isset($_SESSION['role_level']) && $_SESSION['role_level'] >= 40;
+
 $team_members = $pdo->query("
-    SELECT r.name as role_name, u.name, u.email, r.level
+    SELECT r.name as role_name, u.name, u.email, u.phone, u.department, u.session, u.blood_group, u.profile_pic, r.level
     FROM users u 
     JOIN roles r ON u.role_id = r.id 
-    WHERE r.level >= 40
+    WHERE r.level >= 10
     ORDER BY r.level DESC, u.name ASC
 ")->fetchAll(PDO::FETCH_GROUP);
 ?>
@@ -20,186 +29,16 @@ $team_members = $pdo->query("
     <title>Our Team - SCC</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root {
-            --primary: #4f46e5;
-            --primary-dark: #4338ca;
-            --secondary: #c084fc;
-            --text-dark: #1f2937;
-            --text-light: #6b7280;
-            --bg-light: #f9fafb;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-light);
-            color: var(--text-dark);
-        }
-
-        /* Navbar */
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.5rem 5%;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--primary);
-            text-decoration: none;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            list-style: none;
-        }
-
-        .nav-links a {
-            text-decoration: none;
-            color: var(--text-dark);
-            font-weight: 500;
-            transition: color 0.3s;
-        }
-
-        .nav-links a:hover {
-            color: var(--primary);
-        }
-
-        .auth-buttons a {
-            padding: 0.5rem 1.2rem;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .btn-login {
-            color: var(--primary);
-            margin-right: 1rem;
-        }
-
-        .btn-register {
-            background: var(--primary);
-            color: white;
-        }
-
-        .btn-register:hover {
-            background: var(--primary-dark);
-        }
-
-        /* Page Header */
-        .page-header {
-            padding: 10rem 5% 5rem;
-            text-align: center;
-            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
-            color: white;
-        }
-
-        .page-header h1 {
-            font-size: 3.5rem;
-            font-weight: 800;
-            margin-bottom: 1rem;
-        }
-
-        .page-header p {
-            font-size: 1.2rem;
-            color: #9ca3af;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        /* Team Section */
-        .team-section {
-            padding: 5rem 5%;
-        }
-
-        .role-group {
-            margin-bottom: 4rem;
-        }
-
-        .role-title {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 2rem;
-            color: var(--primary);
-            border-bottom: 2px solid #e5e7eb;
-            padding-bottom: 0.5rem;
-        }
-
-        .team-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 2rem;
-        }
-
-        .team-card {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            text-align: center;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s;
-        }
-
-        .team-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .team-img {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-bottom: 1rem;
-            border: 3px solid var(--primary);
-        }
-
-        .team-name {
-            font-size: 1.25rem;
-            font-weight: 700;
-            margin-bottom: 0.25rem;
-        }
-
-        .team-role {
-            color: var(--text-light);
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
-        }
-
-        .team-socials a {
-            color: var(--text-light);
-            font-size: 1.2rem;
-            margin: 0 0.5rem;
-            transition: color 0.3s;
-        }
-
-        .team-socials a:hover {
-            color: var(--primary);
-        }
-
-        .footer {
-            background: #111827;
-            color: white;
-            text-align: center;
-            padding: 2rem;
-            margin-top: auto;
-        }
+        .tabs-container { display: flex; justify-content: center; gap: 1rem; margin-bottom: 3rem; flex-wrap: wrap; }
+        .tab-btn { padding: 0.8rem 2.5rem; font-size: 1rem; font-weight: 700; border: none; border-radius: 30px; background: #eef2ff; color: var(--primary); cursor: pointer; transition: all 0.3s; }
+        .tab-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .role-title { font-size: 1.75rem; font-weight: 800; margin-bottom: 2rem; color: #111827; padding-left: 1rem; border-left: 4px solid var(--primary); }
     </style>
 </head>
 
@@ -217,19 +56,80 @@ $team_members = $pdo->query("
                 <p>Register users and assign them admin/management roles to see them here.</p>
             </div>
         <?php else: ?>
-            <?php foreach ($team_members as $role_name => $member_list): ?>
+            
+            <div class="tabs-container">
+                <button class="tab-btn active" onclick="switchTab('team', this)">Our Team</button>
+                <?php if(isset($team_members['Member'])): ?>
+                    <button class="tab-btn" onclick="switchTab('members', this)">Members</button>
+                <?php endif; ?>
+            </div>
+
+            <div id="tab-team" class="tab-content active">
+                <?php foreach ($team_members as $role_name => $member_list): ?>
+                    <?php if ($role_name === 'Member') continue; ?>
+                    <div class="role-group">
+                        <h2 class="role-title"><?php echo htmlspecialchars($role_name); ?>s</h2>
+                        <div class="team-grid">
+                            <?php foreach ($member_list as $member): ?>
+                                <div class="team-card">
+                                    <?php 
+                                    if (!empty($member['profile_pic'])) {
+                                        $avatar_url = "assets/image/Profile/" . htmlspecialchars($member['profile_pic']);
+                                    } else {
+                                        $avatar_url = "https://ui-avatars.com/api/?name=" . urlencode($member['name']) . "&background=random&color=fff";
+                                    }
+                                    ?>
+                                    <img src="<?php echo $avatar_url; ?>" alt="Profile" class="team-img" style="object-fit:cover;">
+                                    <h3 class="team-name"><?php echo htmlspecialchars($member['name']); ?></h3>
+                                    <div class="team-role"><?php echo htmlspecialchars($role_name); ?></div>
+                                    <div style="font-size:0.85rem; color:var(--text-light); margin-top:0.5rem; line-height:1.6;">
+                                        <?php if(!empty($member['department'])): ?><strong>Dep:</strong> <?php echo htmlspecialchars($member['department']); ?><br><?php endif; ?>
+                                        <?php if(!empty($member['session'])): ?><strong>Session:</strong> <?php echo htmlspecialchars($member['session']); ?><br><?php endif; ?>
+                                        <?php if(!empty($member['blood_group'])): ?><strong>Blood:</strong> <span style="color:#ef4444; font-weight:600;"><?php echo htmlspecialchars($member['blood_group']); ?></span><br><?php endif; ?>
+                                        
+                                        <?php if($is_upper_role): ?>
+                                            <?php if(!empty($member['phone'])): ?><strong>Phone:</strong> <span style="color:var(--text-dark);"><?php echo htmlspecialchars($member['phone']); ?></span><br><?php endif; ?>
+                                            <?php if(!empty($member['email'])): ?><strong>Email:</strong> <span style="color:var(--text-dark);"><?php echo htmlspecialchars($member['email']); ?></span><br><?php endif; ?>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="team-socials">
+                                        <a href="#"><i class="fa-brands fa-linkedin"></i></a>
+                                        <a href="#"><i class="fa-brands fa-github"></i></a>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
+            <?php if(isset($team_members['Member'])): ?>
+            <div id="tab-members" class="tab-content">
                 <div class="role-group">
-                    <h2 class="role-title"><?php echo htmlspecialchars($role_name); ?>s</h2>
                     <div class="team-grid">
-                        <?php foreach ($member_list as $member): ?>
+                        <?php foreach ($team_members['Member'] as $member): ?>
                             <div class="team-card">
-                                <img src="https://ui-avatars.com/api/?name=<?php echo urlencode($member['name']); ?>&background=random&color=fff"
-                                    alt="Profile" class="team-img">
+                                <?php 
+                                if (!empty($member['profile_pic'])) {
+                                    $avatar_url = "assets/image/Profile/" . htmlspecialchars($member['profile_pic']);
+                                } else {
+                                    $avatar_url = "https://ui-avatars.com/api/?name=" . urlencode($member['name']) . "&background=random&color=fff";
+                                }
+                                ?>
+                                <img src="<?php echo $avatar_url; ?>" alt="Profile" class="team-img" style="object-fit:cover;">
                                 <h3 class="team-name"><?php echo htmlspecialchars($member['name']); ?></h3>
-                                <div class="team-role"><?php echo htmlspecialchars($role_name); ?></div>
+                                <div class="team-role">Member</div>
+                                <div style="font-size:0.85rem; color:var(--text-light); margin-top:0.5rem; line-height:1.6;">
+                                    <?php if(!empty($member['department'])): ?><strong>Dep:</strong> <?php echo htmlspecialchars($member['department']); ?><br><?php endif; ?>
+                                    <?php if(!empty($member['session'])): ?><strong>Session:</strong> <?php echo htmlspecialchars($member['session']); ?><br><?php endif; ?>
+                                    <?php if(!empty($member['blood_group'])): ?><strong>Blood:</strong> <span style="color:#ef4444; font-weight:600;"><?php echo htmlspecialchars($member['blood_group']); ?></span><br><?php endif; ?>
+                                    
+                                    <?php if($is_upper_role): ?>
+                                        <?php if(!empty($member['phone'])): ?><strong>Phone:</strong> <span style="color:var(--text-dark);"><?php echo htmlspecialchars($member['phone']); ?></span><br><?php endif; ?>
+                                        <?php if(!empty($member['email'])): ?><strong>Email:</strong> <span style="color:var(--text-dark);"><?php echo htmlspecialchars($member['email']); ?></span><br><?php endif; ?>
+                                    <?php endif; ?>
+                                </div>
                                 <div class="team-socials">
-                                    <a href="mailto:<?php echo htmlspecialchars($member['email']); ?>"><i
-                                            class="fa-solid fa-envelope"></i></a>
                                     <a href="#"><i class="fa-brands fa-linkedin"></i></a>
                                     <a href="#"><i class="fa-brands fa-github"></i></a>
                                 </div>
@@ -237,14 +137,22 @@ $team_members = $pdo->query("
                         <?php endforeach; ?>
                     </div>
                 </div>
-            <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
+
         <?php endif; ?>
     </section>
 
-    <footer class="footer">
-        <p>&copy; 2023 Computer Club. All Rights Reserved.</p>
-    </footer>
+    <?php include 'includes/footer.php'; ?>
 
+    <script>
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            btn.classList.add('active');
+            document.getElementById('tab-' + tabId).classList.add('active');
+        }
+    </script>
 </body>
-
 </html>

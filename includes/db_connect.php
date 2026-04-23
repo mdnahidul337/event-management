@@ -18,4 +18,16 @@ try {
 } catch (\PDOException $e) {
      throw new \PDOException($e->getMessage(), (int) $e->getCode());
 }
+
+// ─── Auto-sync Event Statuses ───
+$now_sync = date('Y-m-d H:i:s');
+$pdo->exec("
+    UPDATE events SET status = 
+    CASE 
+        WHEN '$now_sync' < start_date THEN 'Upcoming'
+        WHEN end_date IS NOT NULL AND '$now_sync' > end_date THEN 'Completed'
+        WHEN end_date IS NULL AND '$now_sync' > DATE_ADD(start_date, INTERVAL 6 HOUR) THEN 'Completed'
+        ELSE 'Ongoing'
+    END
+");
 ?>

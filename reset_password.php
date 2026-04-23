@@ -6,6 +6,14 @@ $token = $_GET['token'] ?? '';
 $error = '';
 $success = '';
 
+$settings = [];
+$stmt = $pdo->query("SELECT * FROM settings");
+while ($row = $stmt->fetch()) {
+    $settings[$row['setting_key']] = $row['setting_value'];
+}
+$site_name = $settings['site_name'] ?? 'SCC.';
+$logo_path = $settings['logo_path'] ?? '';
+
 if (!$token) {
     die("Invalid or missing token.");
 }
@@ -31,11 +39,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $user) {
         
         $pdo->prepare("UPDATE users SET password = ?, reset_token = NULL, reset_token_expire = NULL WHERE id = ?")
             ->execute([$hashed, $user['id']]);
-            
+
         $pdo->prepare("INSERT INTO activity_logs (user_id, action_type, module, details, ip_address) VALUES (?, 'UPDATE', 'auth', 'Password successfully reset', ?)")
             ->execute([$user['id'], $_SERVER['REMOTE_ADDR']]);
-            
-        $success = "Your password has been reset successfully!";
+
+        // Send confirmation email
+        require_once 'includes/mailer_helper.php';
+        send_template_email($pdo, 'password_changed', [
+            'name'  => $user['name'],
+            'email' => $pdo->prepare("SELECT email FROM users WHERE id=?")
+                          ->execute([$user['id']]) ? $pdo->query("SELECT email FROM users WHERE id={$user['id']}")->fetchColumn() : '',
+        ]);
+
+        $success = "Your password has been reset successfully! You can now log in.";
+
     }
 }
 ?>
@@ -67,7 +84,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $user) {
 </head>
 <body>
     <div class="auth-container">
-        <div class="logo">SCC.</div>
+        <div class="logo">
+            <?php if(!empty($logo_path)): ?>
+                <img src="assets/image/<?php echo htmlspecialchars($logo_path); ?>" alt="<?php echo htmlspecialchars($site_name); ?>" style="max-height: 50px;">
+            <?php else: ?>
+                <?php echo htmlspecialchars($site_name); ?>
+            <?php endif; ?>
+        </div>
         <div class="subtitle">Set New Password</div>
         
         <?php if ($success): ?>

@@ -10,6 +10,14 @@ try {
 $message = '';
 $error = '';
 
+$settings = [];
+$stmt = $pdo->query("SELECT * FROM settings");
+while ($row = $stmt->fetch()) {
+    $settings[$row['setting_key']] = $row['setting_value'];
+}
+$site_name = $settings['site_name'] ?? 'SCC.';
+$logo_path = $settings['logo_path'] ?? '';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email']);
     
@@ -24,13 +32,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdo->prepare("UPDATE users SET reset_token = ?, reset_token_expire = ? WHERE id = ?")
             ->execute([$token, $expire, $user['id']]);
             
-        // In a real system, send email here. For MVP, we show the link on screen.
         $reset_link = "http://" . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . "/reset_password.php?token=" . $token;
-        
+
+        // Send real email via SMTPMailer template
+        require_once 'includes/mailer_helper.php';
+        send_template_email($pdo, 'forgot_password', [
+            'name'       => $user['name'],
+            'email'      => $email,
+            'reset_link' => $reset_link,
+        ]);
+
         $pdo->prepare("INSERT INTO activity_logs (user_id, action_type, module, details, ip_address) VALUES (?, 'UPDATE', 'auth', 'Password reset requested', ?)")
             ->execute([$user['id'], $_SERVER['REMOTE_ADDR']]);
-            
-        $message = "Password reset link has been generated. For testing purposes, <a href='" . htmlspecialchars($reset_link) . "' style='color:var(--primary); font-weight:bold; text-decoration:underline;'>click here to reset your password.</a>";
+
+        $message = "A password reset link has been sent to <strong>" . htmlspecialchars($email) . "</strong>. Please check your inbox.";
     } else {
         $error = "If that email exists in our system, a reset link will be sent to it."; // Security best practice
     }
@@ -65,7 +80,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
     <div class="auth-container">
-        <div class="logo">SCC.</div>
+        <div class="logo">
+            <?php if(!empty($logo_path)): ?>
+                <img src="assets/image/<?php echo htmlspecialchars($logo_path); ?>" alt="<?php echo htmlspecialchars($site_name); ?>" style="max-height: 50px;">
+            <?php else: ?>
+                <?php echo htmlspecialchars($site_name); ?>
+            <?php endif; ?>
+        </div>
         <div class="subtitle">Reset your password</div>
         
         <?php if ($message): ?>

@@ -6,116 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About Us - SCC</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #4f46e5;
-            --bg-light: #f9fafb;
-            --text-dark: #1f2937;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-light);
-            color: var(--text-dark);
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.5rem 5%;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--primary);
-            text-decoration: none;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            list-style: none;
-        }
-
-        .nav-links a {
-            text-decoration: none;
-            color: var(--text-dark);
-            font-weight: 500;
-            transition: color 0.3s;
-        }
-
-        .nav-links a:hover {
-            color: var(--primary);
-        }
-
-        .auth-buttons a {
-            padding: 0.5rem 1.2rem;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: 600;
-            background: var(--primary);
-            color: white;
-        }
-
-        .page-header {
-            padding: 10rem 5% 5rem;
-            text-align: center;
-            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
-            color: white;
-        }
-
-        .page-header h1 {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-
-        .content {
-            padding: 5rem 5%;
-            max-width: 800px;
-            margin: 0 auto;
-            flex: 1;
-            line-height: 1.8;
-            font-size: 1.1rem;
-        }
-
-        .footer {
-            background: #111827;
-            color: white;
-            text-align: center;
-            padding: 2rem;
-            margin-top: auto;
-        }
-    </style>
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-
 <body>
-
     <?php include 'includes/header.php'; ?>
-
     <header class="page-header">
         <h1>About the Club</h1>
         <p>Empowering the next generation of tech leaders.</p>
     </header>
 
-    <div class="content">
+    <div class="container" style="max-width: 800px;">
         <h2>Our Mission</h2>
         <p style="margin-bottom: 2rem;">The Computer Club aims to create an environment where students can explore their
             passion for technology, learn new skills, and collaborate on innovative projects. Whether you are a beginner

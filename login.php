@@ -4,6 +4,14 @@ require_once 'includes/db_connect.php';
 
 $error = '';
 
+$settings = [];
+$stmt = $pdo->query("SELECT * FROM settings");
+while ($row = $stmt->fetch()) {
+    $settings[$row['setting_key']] = $row['setting_value'];
+}
+$site_name = $settings['site_name'] ?? 'SCC.';
+$logo_path = $settings['logo_path'] ?? '';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email']);
     $password = $_POST['password'];
@@ -17,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['user_name'] = $user['name'];
         $_SESSION['user_role'] = $user['role_name'];
         $_SESSION['role_level'] = $user['role_level'];
-        
+
         // Log activity
         $stmt = $pdo->prepare("INSERT INTO activity_logs (user_id, action_type, module, details, ip_address) VALUES (?, 'LOGIN', 'auth', 'User logged in', ?)");
         $stmt->execute([$user['id'], $_SERVER['REMOTE_ADDR']]);
@@ -40,93 +48,67 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - SCC</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/main.css">
     <style>
-        :root {
-            --primary: #4f46e5;
-            --primary-dark: #4338ca;
-            --bg-light: #f3f4f6;
-            --text-dark: #1f2937;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { 
-            background-color: var(--bg-light); 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh;
-        }
-        .login-container {
-            background: white;
-            padding: 3rem;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-            width: 100%;
-            max-width: 400px;
-        }
-        .logo { text-align: center; font-size: 2rem; font-weight: 800; color: var(--primary); margin-bottom: 2rem; }
-        .form-group { margin-bottom: 1.5rem; }
-        .form-group label { display: block; font-weight: 500; margin-bottom: 0.5rem; color: var(--text-dark); }
-        .form-group input { 
-            width: 100%; 
-            padding: 0.75rem; 
-            border: 1px solid #d1d5db; 
-            border-radius: 6px; 
-            outline: none;
-            transition: border-color 0.3s;
-        }
-        .form-group input:focus { border-color: var(--primary); }
-        .btn {
-            width: 100%;
-            padding: 0.8rem;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        .btn:hover { background: var(--primary-dark); }
-        .text-center { text-align: center; margin-top: 1.5rem; color: #6b7280; font-size: 0.9rem;}
-        .text-center a { color: var(--primary); text-decoration: none; font-weight: 600; }
-        .alert { padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem; text-align: center; }
-        .alert-error { background: #fee2e2; color: #b91c1c; }
+        body { background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 1.5rem; }
+        .login-card { background: white; padding: 3rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-xl); width: 100%; max-width: 450px; border: 1px solid var(--border); }
+        .login-logo { font-size: 2.25rem; font-weight: 800; color: var(--primary); text-align: center; margin-bottom: 2.5rem; display: block; text-decoration: none; }
+        .form-label { display: block; font-weight: 700; font-size: 0.85rem; color: #374151; margin-bottom: 0.5rem; }
+        .form-input { width: 100%; padding: 0.85rem 1rem; border: 1.5px solid var(--border); border-radius: var(--radius-md); outline: none; transition: 0.2s; font-size: 1rem; }
+        .form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1); }
+        .btn-login { width: 100%; padding: 0.85rem; background: var(--primary); color: white; border: none; border-radius: var(--radius-md); font-size: 1rem; font-weight: 700; cursor: pointer; transition: 0.3s; margin-top: 1rem; }
+        .btn-login:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: var(--shadow-lg); }
+        .alert { padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; font-weight: 600; text-align: center; font-size: 0.9rem; }
+        .alert-error { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+        .auth-footer { margin-top: 2rem; text-align: center; color: var(--text-muted); font-size: 0.9rem; }
+        .auth-footer a { color: var(--primary); font-weight: 700; text-decoration: none; }
+        @media (max-width: 480px) { .login-card { padding: 2rem 1.5rem; } }
     </style>
 </head>
 <body>
+    <div class="login-card">
+        <div class="login-logo">
+            <?php if (!empty($logo_path)): ?>
+                <img src="assets/image/<?php echo htmlspecialchars($logo_path); ?>"
+                    alt="<?php echo htmlspecialchars($site_name); ?>" style="max-height: 60px;">
+            <?php else: ?>
+                <?php echo htmlspecialchars($site_name); ?>
+            <?php endif; ?>
+        </div>
 
-    <div class="login-container">
-        <div class="logo">SCC.</div>
-        
         <?php if ($error): ?>
             <div class="alert alert-error"><?php echo $error; ?></div>
         <?php endif; ?>
 
-        <form action="login.php<?php echo isset($_GET['redirect']) ? '?redirect=' . urlencode($_GET['redirect']) : ''; ?>" method="POST">
-            <div class="form-group">
-                <label>Email Address</label>
-                <input type="email" name="email" placeholder="you@example.com" required>
+        <form
+            action="login.php<?php echo isset($_GET['redirect']) ? '?redirect=' . urlencode($_GET['redirect']) : ''; ?>"
+            method="POST">
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label class="form-label">Email Address</label>
+                <input type="email" name="email" class="form-input" placeholder="you@example.com" required>
             </div>
-            <div class="form-group">
-                <div style="display: flex; justify-content: space-between;">
-                    <label>Password</label>
-                    <a href="forgot_password.php" style="font-size: 0.85rem; color: var(--primary); text-decoration: none;">Forgot password?</a>
+            <div class="form-group" style="margin-bottom: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <label class="form-label" style="margin-bottom: 0;">Password</label>
+                    <a href="forgot_password.php"
+                        style="font-size: 0.8rem; color: var(--primary); text-decoration: none; font-weight: 600;">Forgot password?</a>
                 </div>
-                <input type="password" name="password" placeholder="••••••••" required>
+                <input type="password" name="password" class="form-input" placeholder="••••••••" required>
             </div>
-            <button type="submit" class="btn">Sign In</button>
+            <button type="submit" class="btn-login">Sign In</button>
         </form>
-        <div class="text-center">
+        <div class="auth-footer">
             Don't have an account? <a href="register.php">Register</a><br><br>
-            <a href="index.php">← Back to Home</a>
+            <a href="index.php" style="color: var(--text-muted);">← Back to Home</a>
         </div>
     </div>
 
 </body>
+
 </html>

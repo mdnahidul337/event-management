@@ -10,8 +10,8 @@ require_once '../includes/db_connect.php';
 $error = '';
 $success = '';
 
-// Level 70+ (Management / Admin / SuperAdmin) can manage roles
-$can_manage_users = $_SESSION['role_level'] >= 70;
+// Level 90+ (Admin, SuperAdmin only) can update user roles
+$can_manage_users = $_SESSION['role_level'] >= 90;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $can_manage_users) {
     if (isset($_POST['update_role'])) {
@@ -73,6 +73,7 @@ if ($can_manage_users) {
                         <tr>
                             <th>Name</th>
                             <th>Email</th>
+                            <th>Phone</th>
                             <th>Current Role</th>
                             <th>Joined Date</th>
                             <?php if($can_manage_users): ?>
@@ -85,6 +86,7 @@ if ($can_manage_users) {
                         <tr>
                             <td><strong><?php echo htmlspecialchars($u['name']); ?></strong></td>
                             <td><?php echo htmlspecialchars($u['email']); ?></td>
+                            <td><?php echo htmlspecialchars($u['phone'] ?? '-'); ?></td>
                             <td>
                                 <span class="badge badge-<?php echo strtolower($u['role_name']); ?>"><?php echo htmlspecialchars($u['role_name']); ?></span>
                             </td>

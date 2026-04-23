@@ -23,10 +23,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $site_name = trim($_POST['site_name']);
         $contact_email = trim($_POST['contact_email']);
         $registration_fee = trim($_POST['registration_fee']);
+        $registration_fee_cutoff = trim($_POST['registration_fee_cutoff']);
+        $payment_instructions = trim($_POST['payment_instructions']);
         
         $pdo->prepare("INSERT IGNORE INTO settings (setting_key, setting_value) VALUES ('facebook_url', '')")->execute();
         $pdo->prepare("INSERT IGNORE INTO settings (setting_key, setting_value) VALUES ('twitter_url', '')")->execute();
         $pdo->prepare("INSERT IGNORE INTO settings (setting_key, setting_value) VALUES ('logo_path', '')")->execute();
+        $pdo->prepare("INSERT IGNORE INTO settings (setting_key, setting_value) VALUES ('payment_instructions', '')")->execute();
+        $pdo->prepare("INSERT IGNORE INTO settings (setting_key, setting_value) VALUES ('registration_fee_cutoff', '')")->execute();
 
         $facebook_url = trim($_POST['facebook_url'] ?? '');
         $twitter_url = trim($_POST['twitter_url'] ?? '');
@@ -36,6 +40,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdo->prepare("UPDATE settings SET setting_value = ? WHERE setting_key = 'registration_fee'")->execute([$registration_fee]);
         $pdo->prepare("UPDATE settings SET setting_value = ? WHERE setting_key = 'facebook_url'")->execute([$facebook_url]);
         $pdo->prepare("UPDATE settings SET setting_value = ? WHERE setting_key = 'twitter_url'")->execute([$twitter_url]);
+        $pdo->prepare("UPDATE settings SET setting_value = ? WHERE setting_key = 'payment_instructions'")->execute([$payment_instructions]);
+        $pdo->prepare("UPDATE settings SET setting_value = ? WHERE setting_key = 'registration_fee_cutoff'")->execute([$registration_fee_cutoff]);
 
         // Handle Logo Upload
         if (isset($_FILES['logo']) && $_FILES['logo']['error'] === UPLOAD_ERR_OK) {
@@ -107,6 +113,16 @@ foreach ($settings_raw as $s) {
                         <label>Registration Fee (৳)</label>
                         <input type="number" name="registration_fee" class="form-control" value="<?php echo htmlspecialchars($settings['registration_fee'] ?? '0'); ?>" required>
                         <small style="color:var(--text-muted);">Set to 0 for free registration.</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Fee Requirement Start Date (Cut-off)</label>
+                        <input type="datetime-local" name="registration_fee_cutoff" class="form-control" value="<?php echo date('Y-m-d\TH:i', strtotime($settings['registration_fee_cutoff'] ?? '2000-01-01 00:00:00')); ?>" required>
+                        <small style="color:var(--text-muted);">Members created BEFORE this date will NOT be asked for a registration fee.</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Payment Instructions (for Paid Events)</label>
+                        <textarea name="payment_instructions" class="form-control" rows="4" placeholder="Enter instructions for users to pay for events..."><?php echo htmlspecialchars($settings['payment_instructions'] ?? ''); ?></textarea>
+                        <small style="color:var(--text-muted);">Shown to users on the join event page for paid events.</small>
                     </div>
                     <div class="form-group">
                         <label>Facebook URL</label>

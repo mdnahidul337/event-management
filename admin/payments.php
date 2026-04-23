@@ -19,11 +19,68 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $can_manage_payments) {
         $new_status = $_POST['status']; // 'Approved' or 'Rejected'
         
         if (in_array($new_status, ['Approved', 'Rejected'])) {
+            // If approving, generate join_code if not already exists (for event payments)
+            if ($new_status === 'Approved') {
+                $pay_check = $pdo->query("SELECT event_id, join_code FROM payments WHERE id = $payment_id")->fetch();
+                if ($pay_check && $pay_check['event_id'] && empty($pay_check['join_code'])) {
+                    $join_code = 'CST-' . str_pad($payment_id, 4, '0', STR_PAD_LEFT);
+                    $pdo->prepare("UPDATE payments SET join_code = ? WHERE id = ?")->execute([$join_code, $payment_id]);
+                }
+            }
+
             $stmt = $pdo->prepare("UPDATE payments SET status = ? WHERE id = ?");
             if ($stmt->execute([$new_status, $payment_id])) {
                 $pdo->prepare("INSERT INTO activity_logs (user_id, action_type, module, details, ip_address) VALUES (?, 'UPDATE', 'payments', ?, ?)")
                     ->execute([$_SESSION['user_id'], "Marked payment ID $payment_id as $new_status", $_SERVER['REMOTE_ADDR']]);
-                $success = "Payment $new_status successfully.";
+                
+                // Send automated emails
+                require_once '../includes/mailer_helper.php';
+                $p = $pdo->query("
+                    SELECT p.*, u.name, u.email, e.title as event_title, e.start_date, e.location, e.type as event_type
+                    FROM payments p 
+                    JOIN users u ON p.user_id = u.id 
+                    LEFT JOIN events e ON p.event_id = e.id 
+                    WHERE p.id = $payment_id
+                ")->fetch();
+
+                if ($p) {
+                    if ($new_status === 'Approved') {
+                        // 1. Send General Payment Approved Email
+                        send_template_email($pdo, 'payment_approved', [
+                            'name'    => $p['name'],
+                            'email'   => $p['email'],
+                            'amount'  => $p['amount'],
+                            'method'  => $p['method'],
+                            'trx_id'  => $p['trx_id'],
+                            'event_title' => $p['event_title'] ?? 'General Club Fee'
+                        ]);
+
+                        // 2. If it's an event, send Event Registration Confirmation
+                        if ($p['event_id']) {
+                            send_template_email($pdo, 'event_registered', [
+                                'name'           => $p['name'],
+                                'email'          => $p['email'],
+                                'event_title'    => $p['event_title'],
+                                'event_date'     => date('M d, Y • h:i A', strtotime($p['start_date'])),
+                                'event_location' => $p['location'],
+                                'event_type'     => $p['event_type'],
+                                'join_code'      => $p['join_code']
+                            ]);
+                        }
+                    } else {
+                        // Send Payment Rejected Email
+                        send_template_email($pdo, 'payment_rejected', [
+                            'name'    => $p['name'],
+                            'email'   => $p['email'],
+                            'amount'  => $p['amount'],
+                            'method'  => $p['method'],
+                            'trx_id'  => $p['trx_id'],
+                            'site_url'=> 'http://' . $_SERVER['HTTP_HOST'] . '/SCC'
+                        ]);
+                    }
+                }
+
+                $success = "Payment $new_status successfully. Confirmation email sent to user.";
             } else {
                 $error = "Failed to update payment status.";
             }
@@ -90,6 +147,7 @@ if (!$total_approved) $total_approved = 0;
                             <th>Event</th>
                             <th>Amount</th>
                             <th>Method & TrxID</th>
+                            <th>Ticket Code</th>
                             <th>Date</th>
                             <th>Status</th>
                             <?php if($can_manage_payments): ?>
@@ -103,6 +161,11 @@ if (!$total_approved) $total_approved = 0;
                             <td>
                                 <strong><?php echo htmlspecialchars($p['user_name']); ?></strong><br>
                                 <small style="color:var(--text-muted);"><?php echo htmlspecialchars($p['user_email']); ?></small>
+                                <?php if(!empty($p['user_note'])): ?>
+                                    <div style="margin-top:0.5rem; font-size:0.75rem; color:#854d0e; font-style:italic;">
+                                        "<?php echo htmlspecialchars($p['user_note']); ?>"
+                                    </div>
+                                <?php endif; ?>
                             </td>
                             <td><?php echo htmlspecialchars($p['event_title'] ?? 'General Fee'); ?></td>
                             <td><strong>৳ <?php echo number_format($p['amount'], 2); ?></strong></td>
@@ -113,6 +176,13 @@ if (!$total_approved) $total_approved = 0;
                                 <img src="<?php echo $logo; ?>" alt="<?php echo $p['method']; ?>" class="method-logo">
                                 <?php echo htmlspecialchars($p['trx_id']); ?><br>
                                 <small style="color:var(--text-muted);"><?php echo htmlspecialchars($p['sender_number']); ?></small>
+                            </td>
+                            <td>
+                                <?php if($p['join_code']): ?>
+                                    <span style="background:#eef2ff; color:#4338ca; padding:2px 6px; border-radius:4px; font-weight:700; font-size:0.8rem;"><?php echo htmlspecialchars($p['join_code']); ?></span>
+                                <?php else: ?>
+                                    <span style="color:var(--text-muted); font-size:0.75rem;">N/A</span>
+                                <?php endif; ?>
                             </td>
                             <td><?php echo date('M d, Y', strtotime($p['created_at'])); ?></td>
                             <td>
