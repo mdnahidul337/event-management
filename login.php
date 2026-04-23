@@ -114,7 +114,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input type="email" name="email" placeholder="you@example.com" required>
             </div>
             <div class="form-group">
-                <label>Password</label>
+                <div style="display: flex; justify-content: space-between;">
+                    <label>Password</label>
+                    <a href="forgot_password.php" style="font-size: 0.85rem; color: var(--primary); text-decoration: none;">Forgot password?</a>
+                </div>
                 <input type="password" name="password" placeholder="••••••••" required>
             </div>
             <button type="submit" class="btn">Sign In</button>
